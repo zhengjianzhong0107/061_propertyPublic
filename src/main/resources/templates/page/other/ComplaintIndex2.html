@@ -1,0 +1,144 @@
+<div class="layuimini-container layuimini-page-anim">
+    <div class="layuimini-main">
+
+        <div class="demoTable layui-form">
+
+            投诉类型：
+            <div class="layui-inline">
+                <select name="comId"  id="typeId" lay-verify="required" lay-search="">
+                    <option value="">选择投诉类型</option>
+                </select>
+            </div>
+            处理状态：
+            <div class="layui-inline">
+                <select name="status"  id="status" lay-verify="required" >
+                    <option value="">选择状态</option>
+                    <option value="0">待处理</option>
+                    <option value="1">已处理</option>
+                </select>
+            </div>
+            <button class="layui-btn" data-type="reload">搜索</button>
+        </div>
+
+        <script type="text/html" id="toolbarDemo">
+                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="add"> 我要投诉 </button>
+            </div>
+        </script>
+
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+
+
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'table','miniPage','element'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            miniPage = layui.miniPage;
+
+
+
+        table.render({
+            elem: '#currentTableId',
+            url: 'complaint/queryComplaintAll2',
+            toolbar: '#toolbarDemo',
+            defaultToolbar: ['filter', 'exports', 'print', {
+                title: '提示',
+                layEvent: 'LAYTABLE_TIPS',
+                icon: 'layui-icon-tips'
+            }],
+            cols: [[
+                {type: "checkbox", width: 50},
+                //{field: 'id', width: 80, title: 'ID', sort: true},
+                {templet:'<div>{{d.type.name}}</div>',width: 120, title: '投诉类型'},
+                {field: 'remarks', width: 150, title: '投诉内容'},
+                {templet:'<div>{{d.owner.username}}</div>',width: 100, title: '投诉人'},
+                {field: 'comDate', width: 180, title: '投诉时间'},
+                {field: 'status', width: 180, title: '处理状态',
+                    templet: function(res){
+                        if(res.status=='0'){
+                            return '<span class="layui-badge layui-bg-red" >待处理</span>';
+                        }else{
+                            return '<span class="layui-badge layui-bg-gray" >已处理</span>';
+                        }
+                    }
+                },
+                {field: 'clr', width: 80, title: '处理人'},
+                {title: '', minWidth: 150, toolbar: '#currentTableBar', align: "center"}
+
+            ]],
+            limits: [10, 15, 20, 25, 50, 100],
+            limit: 15,
+            page: true,
+            skin: 'line',
+            id: 'testReload'
+        });
+
+
+        //获取费用类型 并渲染数据到select标签
+        $.get("complainttype/queryAll",{},function (data) {
+            var list=data;
+            var select =document.getElementById("typeId");
+            if(list!=null || list.size()>0){
+                for(var c in list){
+                    var option=document.createElement("option");
+                    option.setAttribute("value",list[c].id);
+                    option.innerText=list[c].name;
+                    select.appendChild(option);
+                }
+            }
+            form.render('select');
+        },"json");
+
+
+        var $ = layui.$, active = {
+            reload: function(){
+                var comId = $('#typeId');
+                var status = $('#status');
+                //执行重载
+                table.reload('testReload', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                        status:status.val(),
+                        comId:comId.val()
+                    }
+                }, 'data');
+            }
+        };
+
+        $('.demoTable .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+
+
+        /**
+         * toolbar事件监听
+         */
+        table.on('toolbar(currentTableFilter)', function (obj) {
+           if (obj.event === 'add') {  // 监听删除操作
+
+               var content = miniPage.getHrefContent('page/other/addComplain.html');
+               var index=openPage(content,"我要投诉",'60%','60%');
+               $(window).on("resize", function () {
+                   layer.full(index);
+               });
+
+           }
+        });
+
+
+
+        //监听表格复选框选择
+        table.on('checkbox(currentTableFilter)', function (obj) {
+            console.log(obj)
+        });
+
+    });
+</script>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stu.dyz.dao.ClockinMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.stu.dyz.model.Clockin">
+                    <id column="id" property="id"/>
+                    <result column="clock_in_time" property="clockInTime"/>
+                    <result column="owner_id" property="ownerId"/>
+                    <result column="house_id" property="houseId"/>
+                    <result column="building_id" property="buildingId"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+            id, clockintime, owner_id, house_id, building_id
+        </sql>
+
+        <resultMap id="queryClockInAllMap" type="com.stu.dyz.model.Clockin" extends="BaseResultMap">
+            <association property="owner" javaType="com.stu.dyz.model.Owner">
+                <id column="id" property="id"></id>
+                <result column="username" property="username"></result>
+                <result column="tel" property="tel"></result>
+            </association>
+            <association property="building" javaType="com.stu.dyz.model.Building">
+                <id column="id" property="id"></id>
+                <result column="numbers" property="numbers"></result>
+                <result column="uints" property="uints"></result>
+            </association>
+            <association property="house" javaType="com.stu.dyz.model.House">
+                <id column="id" property="id"></id>
+                <result column="houseNum" property="numbers"></result>
+            </association>
+        </resultMap>
+
+        <select id="queryClockInAll" parameterType="com.stu.dyz.model.Clockin" resultMap="queryClockInAllMap">
+            SELECT clockin.*,owner.username,building.numbers,building.uints,house.numbers houseNum,owner.tel tel
+            FROM clockin
+            LEFT JOIN owner ON clockin.owner_id = owner.id
+            LEFT JOIN building ON clockin.building_id = building.id
+            LEFT JOIN house ON clockin.house_id = house.id
+            ORDER BY clock_in_time DESC
+        </select>
+
+        <select id="queryCountByOwnIdAndTime" resultType="java.util.Date" parameterType="Integer">
+            SELECT clock_in_time
+            FROM clockin
+            LEFT JOIN OWNER ON clockin.owner_id = owner.id
+            LEFT JOIN building ON clockin.building_id = building.id
+            LEFT JOIN house ON clockin.house_id = house.id
+            WHERE clockin.owner_id=#{ownId}
+            ORDER BY clock_in_time DESC
+            LIMIT 1
+        </select>
+</mapper>

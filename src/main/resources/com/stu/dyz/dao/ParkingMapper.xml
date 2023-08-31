@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stu.dyz.dao.ParkingMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.stu.dyz.model.Parking">
+                    <id column="id" property="id"/>
+                    <result column="numbers" property="numbers"/>
+                    <result column="status" property="status"/>
+                    <result column="owner_id" property="ownerId"/>
+                    <result column="remarks" property="remarks"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+            id, numbers, status, owner_id, remarks
+        </sql>
+
+       <resultMap id="queryParkAllMap" type="com.stu.dyz.model.Parking" extends="BaseResultMap">
+           <association property="owner" javaType="com.stu.dyz.model.Owner">
+               <id column="id" property="id"></id>
+               <result property="username" column="username"></result>
+               <result property="tel" column="tel"></result>
+           </association>
+       </resultMap>
+
+
+       <select id="queryParkAll" parameterType="string" resultMap="queryParkAllMap">
+           SELECT
+            park.*, own.username,
+            own.tel
+        FROM
+            parking park
+        LEFT JOIN OWNER own ON own.id = park.owner_id
+        <where>
+            <if test="numbers!=null and numbers!=''">
+                 and numbers like '%${numbers}%'
+            </if>
+        </where>
+
+       </select>
+
+
+    <select id="queryParkAllByStatus" resultType="com.stu.dyz.model.Parking">
+       select * from parking where status=1 and owner_id is not null
+    </select>
+
+
+</mapper>

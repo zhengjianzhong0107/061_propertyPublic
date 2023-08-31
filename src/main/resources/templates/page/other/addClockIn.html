@@ -1,0 +1,115 @@
+<div class="layuimini-main">
+
+    <div class="layui-form layuimini-form">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">姓名</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" id="name" lay-verify="required" readonly="readonly" value=""  class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">电话</label>
+            <div class="layui-input-block">
+                <input type="text" name="tel" id="tel" lay-verify="required" readonly="readonly" value=""  class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">填报时间</label>
+            <div class="layui-input-block">
+                <input type="text" name="reportDate" id="date" lay-verify="required" readonly="readonly" placeholder="yyyy-MM-dd" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">是否为疑似病例</label>
+            <div class="layui-input-block">
+                <select  lay-verify="required" lay-reqtext="是否为疑似病例选项未选择" name="type1"  id="type1" lay-search="">
+                    <option value="">今日本人/家人是否有呕吐、咳嗽、发热等疑似肺炎症状</option>
+                    <option value="1">是</option>
+                    <option value="0">否</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">是否肺炎确诊</label>
+            <div class="layui-input-block">
+                <select  lay-verify="required" lay-reqtext="是否确诊肺炎选项未选择" name="type2"  id="type2" lay-search="">
+                    <option value="">今日本人/家人/接触的朋友/邻居是否有确诊肺炎</option>
+                    <option value="1">是</option>
+                    <option value="0">否</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">今日所在地</label>
+            <div class="layui-input-block">
+                <input type="text" name="todayAddress" lay-verify="required" placeholder="请输入详细地址" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注信息</label>
+            <div class="layui-input-block">
+                <textarea name="remarks" class="layui-textarea" placeholder="若本人或亲友有疑似症状或者确诊病例，务必请在备注详细说明"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'table','laydate'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            table = layui.table,
+            laydate=layui.laydate,
+            $ = layui.$;
+
+        /*// 日期
+        laydate.render({
+            elem: '#date',
+            trigger:'click'
+        });*/
+
+        /**
+         * 初始化表单，要加上，不然刷新部分组件可能会不加载
+         */
+        form.render();
+
+        //查询owner渲染属性：姓名+电话
+       $.get("clockinnew/queryOwner",{},function (data) {
+            var list = data;
+            for(var c in list){
+                $('#name').val(list[c].username);
+                $('#tel').val(list[c].tel);
+            }
+        },"json");
+
+       //渲染填报日期
+        var date = new Date();
+        var dateString = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+        $('#date').val(dateString);
+
+        // 当前弹出层，防止ID被覆盖
+        var parentIndex = layer.index;
+
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            //获取表单中的数据信息
+            var datas=data.field;
+            console.log(datas);
+            addOrUpdateSubmit($,"clockinnew/add",datas);
+            return false;
+        });
+
+    });
+</script>

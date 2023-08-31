@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stu.dyz.dao.UserinfoMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.stu.dyz.model.Userinfo">
+                    <id column="id" property="id"/>
+                    <result column="username" property="username"/>
+                    <result column="password" property="password"/>
+                    <result column="type" property="type"/>
+                    <result column="remarks" property="remarks"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+            id, username, password, type, remarks
+        </sql>
+
+
+    <select id="queryUserinfoAll" parameterType="com.stu.dyz.model.Userinfo" resultType="com.stu.dyz.model.Userinfo">
+           select * from userinfo
+           <where>
+               <if test="type!=null">
+                 and  type=#{type}
+               </if>
+           </where>
+    </select>
+
+    <select id="queryUserByNameAndPwd" resultType="com.stu.dyz.model.Userinfo"
+     parameterType="com.stu.dyz.model.Userinfo">
+        select * from userinfo u  where username=#{username} and u.password=#{password}
+        and  type=#{type}
+    </select>
+
+    <delete id="deleteUserByUsername" parameterType="String">
+        delete from userinfo where username=#{username2}
+    </delete>
+</mapper>

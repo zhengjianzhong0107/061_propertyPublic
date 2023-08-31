@@ -1,0 +1,86 @@
+<div class="layuimini-container layuimini-page-anim">
+    <div class="layuimini-main">
+
+        <script type="text/html" id="toolbarDemo">
+            <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="add"> 每日疫情打卡 </button>
+            </div>
+        </script>
+
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'table','miniPage','element'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            miniPage = layui.miniPage;
+
+        table.render({
+            elem: '#currentTableId',
+            url:  'clockinnew/queryClockInAll2',
+            toolbar: '#toolbarDemo',
+            defaultToolbar: ['filter', 'exports', 'print', {
+                title: '提示',
+                layEvent: 'LAYTABLE_TIPS',
+                icon: 'layui-icon-tips'
+            }],
+            cols: [[
+                {type: "checkbox", width: 50},
+                //{field: 'id', width: 80, title: 'ID', sort: true},
+                {templet:'<div>{{d.owner.username}}</div>',width: 80, title: '业主'},
+                {templet:'<div>{{d.owner.tel}}</div>',width: 120, title: '联系电话'},
+                {field: 'reportDate', width: 120, title: '填报时间'},
+                {field: 'type1', width: 120, title: '是否疑似病例',
+                    templet: function(res){
+                        if(res.type1=='1'){
+                            return '<span class="layui-badge layui-bg-red" >是</span>';
+                        }else{
+                            return '<span class="layui-badge layui-bg-green" >否</span>';
+                        }
+                    }
+                },
+                {field: 'type2', width: 100, title: '是否确诊',
+                    templet: function(res){
+                        if(res.type2=='1'){
+                            return '<span class="layui-badge layui-bg-red" >是</span>';
+                        }else{
+                            return '<span class="layui-badge layui-bg-green" >否</span>';
+                        }
+                    }
+                },
+                {field: 'todayAddress', width: 120, title: '所在地'},
+                {field: 'remarks', width: 80, title: '备注'},
+                {title: '', minWidth: 150, toolbar: '#currentTableBar', align: "center"}
+            ]],
+            limits: [10, 15, 20, 25, 50, 100],
+            limit: 15,
+            page: true,
+            skin: 'line',
+            id: 'testReload'
+        });
+
+
+        /**
+         * toolbar事件监听
+         */
+        table.on('toolbar(currentTableFilter)', function (obj) {
+            if (obj.event === 'add') {  // 监听删除操作
+
+                var content = miniPage.getHrefContent('page/other/addClockIn.html');
+                var index = openPage(content, "疫情打卡", '80%', '80%');
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+
+            }
+        });
+
+        //监听表格复选框选择
+        table.on('checkbox(currentTableFilter)', function (obj) {
+            console.log(obj)
+        });
+    });
+</script>

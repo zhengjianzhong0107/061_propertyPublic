@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stu.dyz.dao.CarchargeMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.stu.dyz.model.Carcharge">
+                    <id column="id" property="id"/>
+                    <result column="pay_date" property="payDate"/>
+                    <result column="end_date" property="endDate"/>
+                    <result column="money" property="money"/>
+                    <result column="status" property="status"/>
+                    <result column="owner_id" property="ownerId"/>
+                    <result column="remarks" property="remarks"/>
+                    <result column="type" property="type"/>
+                    <result column="park_id" property="parkId"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+            id, pay_date, end_date, money, status, owner_id, remarks, type, park_id
+        </sql>
+
+    <resultMap id="queryCarChargeAllMap" type="com.stu.dyz.model.Carcharge" extends="BaseResultMap">
+         <association property="owner" javaType="com.stu.dyz.model.Owner">
+             <id column="id" property="id"></id>
+             <result column="username" property="username"></result>
+         </association>
+         <association property="parking" javaType="com.stu.dyz.model.Parking">
+            <id column="id" property="id"></id>
+            <result column="numbers" property="numbers"></result>
+         </association>
+    </resultMap>
+
+
+    <select id="queryCarChargeAll" resultMap="queryCarChargeAllMap"
+            parameterType="com.stu.dyz.model.Carcharge">
+        SELECT
+            car.*,park.numbers,own.username
+        FROM
+            carcharge car
+        LEFT JOIN parking park ON park.id = car.park_id
+        LEFT JOIN `owner` own ON own.id = car.owner_id
+        <where>
+            <if test="parking!=null">
+                <if test="parking.numbers!=null and parking.numbers!=''">
+                    and park.numbers =#{parking.numbers}
+                </if>
+
+            </if>
+            <if test="status!=null and status!=''">
+                and car.status=#{status}
+            </if>
+
+            <if test="ownerId!=null">
+                and car.owner_id=#{ownerId}
+            </if>
+
+        </where>
+
+    </select>
+
+</mapper>

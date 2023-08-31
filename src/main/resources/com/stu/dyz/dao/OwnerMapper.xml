@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stu.dyz.dao.OwnerMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.stu.dyz.model.Owner">
+                    <id column="id" property="id"/>
+                    <result column="username" property="username"/>
+                    <result column="tel" property="tel"/>
+                    <result column="sex" property="sex"/>
+                    <result column="identity" property="identity"/>
+                    <result column="house_id" property="houseId"/>
+                    <result column="remarks" property="remarks"/>
+                    <result column="password" property="password"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+            id, username, tel, sex, identity, house_id, remarks, password
+        </sql>
+
+    <resultMap id="queryOwnerAllMap" type="com.stu.dyz.model.Owner" extends="BaseResultMap">
+
+       <association property="house" javaType="com.stu.dyz.model.House">
+           <id column="id" property="id"></id>
+           <result property="numbers" column="numbers"></result>
+       </association>
+
+    </resultMap>
+    
+      <select id="queryOwnerAll" parameterType="com.stu.dyz.model.Owner"
+              resultMap="queryOwnerAllMap">
+          SELECT
+            own.*, hou.numbers
+        FROM
+            owner own
+        LEFT JOIN house hou ON hou.id = own.house_id
+        <where>
+             <if test="tel!=null and tel !=''">
+                  and tel like '%${tel}%'
+             </if>
+             <if test="identity!=null and identity !=''">
+                and identity like '%${identity}%'
+             </if>
+        </where>
+        order by own.id desc
+      </select>
+
+    <select id="queryOwnerByName" parameterType="string" resultType="com.stu.dyz.model.Owner">
+        select * from owner where username=#{username}
+    </select>
+
+    <select id="queryOwnerById" parameterType="long" resultType="com.stu.dyz.model.Owner">
+        select * from owner where id=#{id}
+    </select>
+
+    <delete id="deleteOwnerUserByUserName" parameterType="String">
+        delete from owner where username=#{username2}
+    </delete>
+
+</mapper>

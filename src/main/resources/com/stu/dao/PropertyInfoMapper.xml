@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stu.dao.PropertyInfoMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.stu.model.PropertyInfo">
+                    <id column="id" property="id"/>
+                    <result column="type_id" property="typeId"/>
+                    <result column="money" property="money"/>
+                    <result column="start_date" property="startDate"/>
+                    <result column="end_date" property="endDate"/>
+                    <result column="status" property="status"/>
+                    <result column="house_id" property="houseId"/>
+                    <result column="remarks" property="remarks"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+            id, type_id, money, start_date, end_date, status, house_id, remarks
+        </sql>
+
+
+    <delete id="deleteByHouIdAndTime" >
+       <!--delete from property_info where house_id=#{houId} and end_date  like '%${endDate}%'*-->
+        delete from property_info where house_id=#{houId} and end_date=#{endDate}
+    </delete>
+
+    <resultMap id="queryListAllMap" type="com.stu.model.PropertyInfo" extends="BaseResultMap">
+        <association property="owner" javaType="com.stu.model.Owner">
+            <id column="id" property="id"></id>
+            <result column="username" property="username"></result>
+        </association>
+        <association property="house" javaType="com.stu.model.House">
+            <id column="id" property="id"></id>
+            <result column="numbers" property="numbers"></result>
+        </association>
+        <association property="type" javaType="com.stu.model.PropertyType">
+            <id column="id" property="id"></id>
+            <result column="name" property="name"></result>
+        </association>
+    </resultMap>
+
+
+    <select id="queryListAll" parameterType="com.stu.model.PropertyInfo" resultMap="queryListAllMap">
+        SELECT
+            info.*, own.username,
+            hou.numbers,
+            type. NAME
+        FROM
+            property_info info
+        LEFT JOIN house hou ON hou.id = info.house_id
+        LEFT JOIN `owner` own ON own.house_id = hou.id
+        LEFT JOIN property_type type ON type.id = info.type_id
+        <where>
+             <if test="house!=null">
+                 <if test="house.numbers!=null">
+                     and hou.numbers like '%${house.numbers}%'
+                 </if>
+             </if>
+
+            <if test="status!=null and status !=''">
+                    and info.status =#{status}
+            </if>
+
+            <if test="houseId!=null">
+                and info.house_id =#{houseId}
+            </if>
+        </where>
+
+    </select>
+
+</mapper>

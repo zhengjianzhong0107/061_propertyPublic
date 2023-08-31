@@ -1,0 +1,116 @@
+<div class="layuimini-container layuimini-page-anim">
+    <div class="layuimini-main">
+
+        <div class="demoTable layui-form" >
+
+            缴费状态：
+            <div class="layui-inline" >
+                <select name="status"  id="status">
+                   <option value="">请选择</option>
+                    <option value="1">已缴费</option>
+                    <option value="0">未缴费</option>
+                </select>
+            </div>
+            <button class="layui-btn" data-type="reload">搜索</button>
+        </div>
+
+
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'table','miniPage','element'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            element=layui.element,
+            miniPage = layui.miniPage;
+
+        form.render('select');
+
+
+        table.render({
+            elem: '#currentTableId',
+            url: 'propertyinfo/queryPropertyAll2',
+            toolbar: '#toolbarDemo',
+            defaultToolbar: ['filter', 'exports', 'print', {
+                title: '提示',
+                layEvent: 'LAYTABLE_TIPS',
+                icon: 'layui-icon-tips'
+            }],
+            cols: [[
+                {type: "checkbox", width: 50},
+                //{field: 'id', width: 80, title: 'ID', sort: true},
+                {templet:'<div>{{d.house.numbers}}</div>',width: 100, title: '房间号'},
+                {templet:'<div>{{d.owner.username}}</div>',width: 100, title: '房东'},
+                {templet:'<div>{{d.type.name}}</div>',width: 100, title: '费用类型'},
+                {field: 'startDate', width: 120, title: '开始时间'},
+                {field: 'endDate', width: 120, title: '结束时间'},
+                {field: 'money', width: 100, title: '金额'},
+                {field: 'status', width: 100, title: '状态',
+                 templet: function(res){
+                    if(res.status=='0'){
+                        return '<span class="layui-badge layui-bg-red" >未缴费</span>';
+                    }else{
+                        return '<span class="layui-badge layui-bg-gray" >缴费</span>';
+                    }
+                 }
+                },
+                {title: '', minWidth: 150, toolbar: '#currentTableBar', align: "center"}
+            ]],
+            limits: [10, 15, 20, 25, 50, 100],
+            limit: 15,
+            page: true,
+            skin: 'line',
+            id: 'testReload'
+        });
+
+
+        var $ = layui.$, active = {
+            reload: function(){
+                var status = $('#status');
+                //执行重载
+                table.reload('testReload', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                        status:status.val()
+                    }
+                }, 'data');
+            }
+        };
+
+        $('.demoTable .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            var result = JSON.stringify(data.field);
+            layer.alert(result, {
+                title: '最终的搜索信息'
+            });
+
+            //执行搜索重载
+            table.reload('currentTableId', {
+                page: {
+                    curr: 1
+                }
+                , where: {
+                    searchParams: result
+                }
+            }, 'data');
+
+            return false;
+        });
+
+
+
+    });
+</script>
+

@@ -1,0 +1,204 @@
+<div class="layuimini-container layuimini-page-anim">
+    <div class="layuimini-main layui-form">
+
+        <div class="demoTable">
+            门牌号：
+            <div class="layui-inline">
+                <input class="layui-input" name="numbers"  id="numbers" autocomplete="off">
+            </div>
+            费用类型：
+            <div class="layui-inline">
+                <select name="typeId"  id="typeId" lay-verify="required" lay-search="">
+                    <option value="">选择费用类型</option>
+                </select>
+            </div>
+            <button class="layui-btn" data-type="reload">搜索</button>
+        </div>
+
+        <script type="text/html" id="toolbarDemo">
+            <div class="layui-btn-container">
+                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> 抄表登记 </button>
+                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> 批量删除 </button>
+            </div>
+        </script>
+
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+        <script type="text/html" id="currentTableBar">
+            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+        </script>
+
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'table','miniPage','element'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            miniPage = layui.miniPage;
+
+        table.render({
+            elem: '#currentTableId',
+            url:  'records/queryRecordsAll',
+            toolbar: '#toolbarDemo',
+            defaultToolbar: ['filter', 'exports', 'print', {
+                title: '提示',
+                layEvent: 'LAYTABLE_TIPS',
+                icon: 'layui-icon-tips'
+            }],
+            cols: [[
+                {type: "checkbox", width: 50},
+                //{field: 'id', width: 80, title: 'ID', sort: true},
+                {field: 'numbers', width: 100, title: '门牌号'},
+                {field: 'username', width: 80, title: '户主'},
+                {field: 'typename', width: 100, title: '费用类型'},
+                {field: 'num', width: 100, title: '上次度数'},
+                {field: 'num2', width: 100, title: '本次度数'},
+                {field: 'checkTime', width: 120, title: '登记时间'},
+                {field: 'meter', width: 100, title: '抄表员'},
+                {title: '操作', minWidth: 150, toolbar: '#currentTableBar', align: "center"}
+            ]],
+            limits: [10, 15, 20, 25, 50, 100],
+            limit: 15,
+            page: true,
+            skin: 'line',
+            id: 'testReload'
+        });
+
+
+        var $ = layui.$, active = {
+            reload: function(){
+                var numbers = $('#numbers');
+                var typeId = $('#typeId');
+                //执行重载
+                table.reload('testReload', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                        numbers:numbers.val(),
+                        typeId:typeId.val()
+                    }
+                }, 'data');
+            }
+        };
+
+        //获取费用类型 并渲染数据到select标签
+        $.get("propertyType/queryAll",{},function (data) {
+            var list=data;
+            var select =document.getElementById("typeId");
+            if(list!=null || list.size()>0){
+                for(var c in list){
+                    var option=document.createElement("option");
+                    option.setAttribute("value",list[c].id);
+                    option.innerText=list[c].name;
+                    select.appendChild(option);
+                }
+            }
+            form.render('select');
+        },"json");
+
+        $('.demoTable .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            var result = JSON.stringify(data.field);
+            layer.alert(result, {
+                title: '最终的搜索信息'
+            });
+
+            //执行搜索重载
+            table.reload('currentTableId', {
+                page: {
+                    curr: 1
+                }
+                , where: {
+                    searchParams: result
+                }
+            }, 'data');
+
+            return false;
+        });
+
+        /**
+         * toolbar事件监听
+         */
+        table.on('toolbar(currentTableFilter)', function (obj) {
+            if (obj.event === 'add') {   // 监听添加操作
+                var content = miniPage.getHrefContent('page/base/record/addRecord.html');
+                var index=openPage(content,"信息抄表",'80%','80%');
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+            } else if (obj.event === 'delete') {  // 监听删除操作
+                /*
+                  1、判断是否有选择记录 如果没有提示
+                  2、获取要删除的id集合
+                  3、发送请求 实现删除功能
+                  4、提示成功 并刷新主页
+                 */
+                var checkStatus=table.checkStatus(obj.config.id);
+                var data =checkStatus.data;
+                if(data.length==0){
+                    layer.msg("请选择要删除的记录信息");
+                }else{
+                    //获取要删除id的集合
+                    var ids =getCheckId(data);
+                    layer.confirm('你确定要删除记录吗？',function (index) {
+                        //执行删除功能
+                        deleteByIds($,"records/deleteByIds",ids,index);
+                    })
+
+                }
+
+            }
+        });
+
+
+
+        //监听表格复选框选择
+        table.on('checkbox(currentTableFilter)', function (obj) {
+            console.log(obj)
+        });
+
+        /**
+         * 设计渲染form中的信息值
+         */
+        function setFormValues(data){
+            form.val("updateSubmit",{
+                "id":data.id,
+                "username":data.username,
+                "tel":data.tel,
+                "sex":data.sex,
+                "houseId":data.houseId,
+                "identity":data.identity,
+                "typeIds":data.houseId,
+                "remarks":data.remarks
+            });
+        };
+
+        table.on('tool(currentTableFilter)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'edit') {
+                var content = miniPage.getHrefContent('page/base/owner/editOwner.html');
+                var index=openPage(content,"业主维护",'70%','70%');
+
+                //渲染数据
+                setFormValues(data);
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+                return false;
+            } else if (obj.event === 'delete') {
+                layer.confirm('确定是否删除', function (index) {
+                    deleteByIds($,"records/deleteByIds",data.id,index)
+                });
+            }
+        });
+
+    });
+</script>

@@ -1,0 +1,213 @@
+<div class="layuimini-container layuimini-page-anim">
+    <div class="layuimini-main layui-form">
+
+        <div class="demoTable">
+            用户类型：
+            <div class="layui-inline">
+                <select name="type" id="type" lay-verify="required"  lay-search="">
+                    <option value="">请选择用户类型</option>
+                    <option value="1">管理员</option>
+                    <option value="0">业主</option>
+                </select>
+            </div>
+            <button class="layui-btn" data-type="reload">搜索</button>
+        </div>
+
+        <script type="text/html" id="toolbarDemo">
+            <div class="layui-btn-container">
+                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> 添加 </button>
+                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> 删除 </button>
+            </div>
+        </script>
+
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+        <script type="text/html" id="currentTableBar">
+
+          <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">修改密码</a>
+          <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+
+        </script>
+
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'table','miniPage','element'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            element=layui.element;
+            miniPage = layui.miniPage;
+
+        table.render({
+            elem: '#currentTableId',
+            url: 'userinfo/queryUserInfoAll',
+            toolbar: '#toolbarDemo',
+            defaultToolbar: ['filter', 'exports', 'print', {
+                title: '提示',
+                layEvent: 'LAYTABLE_TIPS',
+                icon: 'layui-icon-tips'
+            }],
+            cols: [[
+                {type: "checkbox", width: 50},
+                //{field: 'id', width: 80, title: 'ID', sort: true},
+                {field: 'username',width: 100, title: '用户名'},
+                {field: 'status', width: 80, title: '状态',
+                    templet:function(res){
+                        if(res.type=='1'){
+                            return '<span class="layui-badge layui-bg-green">管理员</span>';
+                        }else{
+                            return '<span class="layui-badge layui-bg-orange">业主</span>';
+                        }
+                    }},
+                {title: '操作', minWidth: 150, toolbar: '#currentTableBar', align: "center"}
+            ]],
+            limits: [10, 15, 20, 25, 50, 100],
+            limit: 15,
+            page: true,
+            id:'testReload',
+            skin: 'line'
+        });
+
+        var $ = layui.$, active = {
+            reload: function(){
+                var type = $('#type');
+                //执行重载
+                table.reload('testReload', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                        type:type.val()
+                    }
+                }, 'data');
+            }
+        };
+
+        $('.demoTable .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        form.render('select');//让下拉框在页面上显示
+
+        /**
+         * toolbar事件监听
+         */
+        table.on('toolbar(currentTableFilter)', function (obj) {
+            if (obj.event === 'add') {   // 监听添加操作
+                var content = miniPage.getHrefContent('page/base/admin/add.html');
+                var openWH = miniPage.getOpenWidthHeight();
+
+                var index = layer.open({
+                    title: '添加管理员',
+                    type: 1,
+                    shade: 0.2,
+                    maxmin:true,
+                    shadeClose: true,
+                    area: [openWH[0] + 'px', openWH[1] + 'px'],
+                    offset: [openWH[2] + 'px', openWH[3] + 'px'],
+                    content: content,
+                });
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+            } else  if (obj.event === 'delete') {  // 监听删除操作
+                var checkStatus = table.checkStatus(obj.config.id)
+                    , data = checkStatus.data;
+                /**
+                 *  首先判断是否选择信息，如果没有提示
+                 *  如果有
+                 *     1、获取选中的id集合
+                 *     2、通过ajax请求发送id集合，进行业务处理
+                 */
+                if(data.length==0){
+                    layer.msg("请选要删除的记录信息");
+                }else{
+                    //获取删除id的集合
+                    var ids=getCheckId(data);
+                    layer.confirm("确定是否删除？",function(index){
+                        deleteByIds(ids,index);
+                    })
+                }
+                 // layer.alert(JSON.stringify(data));
+            }
+        });
+
+        /**
+         * 获取批量删除选中的id集合
+         */
+        function getCheckId(data){
+            var arr=new Array();
+            for(var i=0;i<data.length;i++){
+                arr.push(data[i].id);
+            }
+            return arr.join(",");
+        };
+
+        /**
+         * 删除功能的实现
+         */
+        function deleteByIds(ids,index){
+            $.ajax({
+                url:"userinfo/deleteByIds",
+                type:"POST",
+                data:{"ids":ids},
+                success:function(result){
+                    if(result.code==200){
+                        layer.msg("删除成功",{
+                            icon:6,
+                            time:500
+                        },function(){
+                            parent.window.location.reload();//重新页面
+                            var iframeIndex = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(iframeIndex);
+                        });
+
+                    }else{
+                        layer.msg("删除失败");
+                    }
+                }
+            })
+            return false;
+        };
+        //监听表格复选框选择
+        table.on('checkbox(currentTableFilter)', function (obj) {
+            console.log(obj)
+        });
+
+
+
+        table.on('tool(currentTableFilter)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'edit') {
+                //修改密码
+                var content = miniPage.getHrefContent('page/base/admin/edit.html');
+                var openWH = miniPage.getOpenWidthHeight();
+                var index = layer.open({
+                    title: '修改密码',
+                    type: 1,
+                    shade: 0.2,
+                    maxmin:true,
+                    shadeClose: true,
+                    area: ['60%','60%'],
+                    content: content,
+                });
+                $("#userId").val(data.id);
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+                return false;
+
+            } else if (obj.event === 'delete') {
+                layer.confirm('确定是否删除', function (index) {
+                    //调用删除功能即可
+                    deleteByIds(data.id,index);
+                    layer.close(index);
+                });
+            }
+        });
+
+    });
+</script>

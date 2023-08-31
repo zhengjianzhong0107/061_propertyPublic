@@ -1,0 +1,118 @@
+<div class="layuimini-main">
+
+    <div class="layui-form layui-form">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">房子编号</label>
+            <div class="layui-input-block">
+                <select name="houseId" lay-verify="required"  id="houseId" lay-search="">
+                    <option value="">请选择房子</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">费用类型</label>
+            <div class="layui-input-block">
+                <select name="typeId" lay-verify="required"  id="typeId2" lay-search="">
+                    <option value="">选择费用类型</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">数据值</label>
+            <div class="layui-input-block">
+                <input type="text" name="num2" lay-verify="required" lay-reqtext="数据值不能为空"
+                      class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">抄表时间</label>
+            <div class="layui-input-block">
+                <input type="text" name="onTime" class="layui-input" id="date" lay-verify="date" placeholder="yyyy-MM-dd"
+                       autocomplete="off">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">抄表员</label>
+            <div class="layui-input-block">
+                <input type="text" name="meter" lay-verify="required" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注信息</label>
+            <div class="layui-input-block">
+                <textarea name="remarks" class="layui-textarea" placeholder="请输入备注信息"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认抄表</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'table','laydate'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            table = layui.table,
+            laydate=layui.laydate,
+            $ = layui.$;
+
+        // 日期
+        laydate.render({
+            elem: '#date',
+            trigger:'click'
+        });
+        form.render();
+        //查询所有的楼宇信息并渲染到select中
+        $.get("house/queryAll",{},function (data) {
+            var list=data;
+            var select =document.getElementById("houseId");
+            if(list!=null || list.size()>0){
+                for(var c in list){
+                    var option=document.createElement("option");
+                    option.setAttribute("value",list[c].id);
+                    option.innerText=list[c].numbers;
+                    select.appendChild(option);
+                }
+            }
+            form.render('select');
+        },"json");
+
+        //获取费用类型 并渲染数据到select标签
+        $.get("propertyType/queryAll",{},function (data) {
+            var list=data;
+            var select =document.getElementById("typeId2");
+            if(list!=null || list.size()>0){
+                for(var c in list){
+                    var option=document.createElement("option");
+                    option.setAttribute("value",list[c].id);
+                    option.innerText=list[c].name;
+                    select.appendChild(option);
+                }
+            }
+            form.render('select');
+        },"json");
+
+
+
+        // 当前弹出层，防止ID被覆盖
+        var parentIndex = layer.index;
+
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            //获取表单中的数据信息
+            var datas=data.field;
+            addOrUpdateSubmit($,"records/add",datas);
+            return false;
+        });
+
+    });
+</script>

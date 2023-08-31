@@ -1,0 +1,72 @@
+<div class="layuimini-main">
+
+    <div class="layui-form layuimini-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">登录名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="username" lay-verify="required" lay-reqtext="登录名称不能为空" placeholder="请输入登录名称" value="" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">用户类型</label>
+            <div class="layui-input-block">
+                <select name="type" lay-verify="required" >
+                    <option value="1">管理员</option>
+                </select>
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="password" lay-verify="required"   class="layui-input">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'table'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            // table = layui.table,
+            $ = layui.$;
+        form.render();
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            console.log(data.field);
+            //向后台发送数据并进行添加操作
+            $.ajax({
+                url:"userinfo/add",
+                type:"POST",
+                contentType:"application/json",
+                data:JSON.stringify(data.field),
+                success:function(result){
+                    console.log(result)
+                    if(result.code==200){
+                        layer.msg("添加成功",{
+                            icon:6,
+                            time:500
+                        },function(){
+                            parent.window.location.reload();//重新页面
+                            var iframeIndex = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(iframeIndex);
+                        });
+
+                    }else{
+                        layer.msg("添加失败");
+                    }
+                }
+            })
+            return false;
+        });
+    });
+</script>

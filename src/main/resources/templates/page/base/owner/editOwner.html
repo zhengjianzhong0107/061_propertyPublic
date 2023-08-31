@@ -1,0 +1,101 @@
+<div class="layuimini-main">
+
+    <div class="layui-form layuimini-form" lay-filter="updateSubmit">
+        <input type="hidden" name="id">
+        <input type="hidden" name="typeIds" id="typeIds">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">业主姓名</label>
+            <div class="layui-input-block">
+                <input type="text" name="username" lay-verify="required" lay-reqtext="业主姓名不能为空"
+                       placeholder="请输入业主姓名" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">业主电话</label>
+            <div class="layui-input-block">
+                <input type="text" name="tel" lay-verify="required" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">性别</label>
+            <div class="layui-input-block">
+                <input type="radio" name="sex" value="男" title="男" checked="">
+                <input type="radio" name="sex" value="女" title="女">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">身份证号</label>
+            <div class="layui-input-block">
+                <input type="text" name="identity" lay-verify="required" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">房子编号</label>
+            <div class="layui-input-block">
+                <select name="houseId" lay-verify="required"  id="typeId" lay-search="">
+                    <option value="">请选择房子</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注信息</label>
+            <div class="layui-input-block">
+                <textarea name="remarks" class="layui-textarea" placeholder="请输入备注信息"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="updateSubmit">确认修改</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'table','laydate'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            table = layui.table,
+            laydate=layui.laydate,
+            $ = layui.$;
+
+
+        form.render();
+        //查询所有的楼宇信息并渲染到select中
+        $.get("house/queryAll",{},function (data) {
+            var list=data;
+            var select =document.getElementById("typeId");
+            if(list!=null || list.size()>0){
+                for(var c in list){
+                    var option=document.createElement("option");
+                    option.setAttribute("value",list[c].id);
+                    option.innerText=list[c].numbers;
+                    select.appendChild(option);
+                    var selectTypeId=$("#typeIds").val();
+                    //遍历选中状态
+                    if(selectTypeId==list[c].id){
+                        option.setAttribute("selected","selected");
+                        layui.form.render('select');
+                    }
+                }
+            }
+            form.render('select');
+        },"json");
+
+
+
+        // 当前弹出层，防止ID被覆盖
+        var parentIndex = layer.index;
+
+        //监听提交
+        form.on('submit(updateSubmit)', function (data) {
+            //获取表单中的数据信息
+            var datas=data.field;
+            addOrUpdateSubmit($,"owner/add",datas);
+            return false;
+        });
+
+    });
+</script>

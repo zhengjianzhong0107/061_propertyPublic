@@ -1,0 +1,36 @@
+<div class="layuimini-container layuimini-page-anim">
+    <div class="layuimini-main">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-normal layui-btn-sm clockIn" id="btn"> 疫情打卡 </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    layui.use('tree', function(){
+        var $ = layui.jquery;
+        var username=localStorage.getItem("username");
+        //console.log(username);
+        $(".clockIn").on('click',function (){
+            $.ajax({
+                type:"post",
+                // data:{'username':username},
+                url:"clockin/clockInAdd?username="+username,
+                success:function (result) {
+                    if(result.code==200) {
+                        /*var btn = document.getElementById("btn");
+                        btn.innerText = "已打卡";
+                        btn.style.backgroundColor  = '#969696';*/
+                        layer.msg('打卡成功', {
+                            iocn: 6,
+                            time: 1000
+                        });
+
+                    }else{
+                        layer.msg(result.msg);
+                    }
+                }
+            })
+        });
+    });
+</script>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stu.dyz.dao.HouseMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.stu.dyz.model.House">
+                    <id column="id" property="id"/>
+                    <result column="storey" property="storey"/>
+                    <result column="numbers" property="numbers"/>
+                    <result column="status" property="status"/>
+                    <result column="intoDate" property="intoDate"/>
+                    <result column="building_id" property="buildingId"/>
+                    <result column="remarks" property="remarks"/>
+                    <result column="area" property="area"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+            id, storey, numbers, status, intoDate, building_id, remarks, area
+        </sql>
+
+    <select id="findHouseAll" parameterType="string" resultType="com.stu.dyz.model.House">
+        select * from house
+        <where>
+            <if test="numbers!=null and numbers!=''">
+                 and numbers like '%${numbers}%'
+            </if>
+        </where>
+    </select>
+
+    <select id="queryHouseById" resultType="com.stu.dyz.model.House" parameterType="Integer">
+        select * from house where id = #{houId}
+    </select>
+</mapper>

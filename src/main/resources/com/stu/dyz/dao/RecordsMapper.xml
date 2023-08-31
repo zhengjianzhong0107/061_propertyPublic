@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stu.dyz.dao.RecordsMapper">
+
+    <select id="queryRecordsAll" parameterType="com.stu.dyz.model.RecordVo"
+            resultType="com.stu.dyz.model.RecordVo">
+    SELECT
+	rec.*,hou.numbers,own.username,type.`name` as typename
+    FROM
+        records rec
+    LEFT JOIN property_type type ON type.id = rec.type_id
+    LEFT JOIN house hou ON hou.id = rec.house_id
+    LEFT JOIN OWNER own ON own.house_id = hou.id
+   <where>
+       <if test="numbers!=null and numbers!=''">
+            and numbers like '%${numbers}%'
+       </if>
+       <if test="typeId!=null ">
+           and type_id=#{typeId}
+       </if>
+   </where>
+    </select>
+
+    <select id="queryByHouIdAndTypeId" parameterType="int" resultType="com.stu.dyz.model.Records">
+          select * from records where house_id=#{houId} and type_id=#{typeId} order by id desc
+          limit 1
+    </select>
+
+</mapper>

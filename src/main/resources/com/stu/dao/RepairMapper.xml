@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stu.dao.RepairMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.stu.model.Repair">
+                    <id column="id" property="id"/>
+                    <result column="com_id" property="comId"/>
+                    <result column="com_date" property="comDate"/>
+                    <result column="handle_date" property="handleDate"/>
+                    <result column="owner_id" property="ownerId"/>
+                    <result column="status" property="status"/>
+                    <result column="clr" property="clr"/>
+                    <result column="remarks" property="remarks"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+            id, com_id, com_date, handle_date, owner_id, status, clr, remarks
+        </sql>
+
+    <resultMap id="queryRepairAllMap" type="com.stu.model.Repair" extends="BaseResultMap">
+        <association property="owner" javaType="com.stu.model.Owner">
+            <id property="id" column="id"></id>
+            <result property="username" column="username"></result>
+        </association>
+        <association property="type" javaType="com.stu.model.Repairtype">
+            <id property="id" column="id"></id>
+            <result property="name" column="name"></result>
+        </association>
+    </resultMap>
+
+    <select id="queryRepairAll" parameterType="com.stu.model.Repair" resultMap="queryRepairAllMap">
+        SELECT
+        rep.*, own.username,
+        type. NAME
+        FROM
+        REPAIR rep
+        LEFT JOIN repairtype type ON type.id = rep.com_id
+        LEFT JOIN `owner` own ON own.id = rep.owner_id
+
+        <where>
+            <if test="comId!=null">
+                and com_id=#{comId}
+            </if>
+            <if test="status!=null ">
+                and rep.status=#{status}
+            </if>
+            <if test="ownerId!=null ">
+                and rep.owner_id=#{ownerId}
+            </if>
+        </where>
+
+    </select>
+
+
+    <select id="queryTongji" resultType="com.stu.model.Tongji">
+       SELECT
+            count(info.id) AS counts,
+            type.NAME
+        FROM
+            `repair` info
+        LEFT JOIN repairtype type ON type.id = info.com_id
+        GROUP BY
+            info.com_id
+    </select>
+
+
+</mapper>

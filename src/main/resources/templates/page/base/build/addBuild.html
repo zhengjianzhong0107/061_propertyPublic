@@ -1,0 +1,61 @@
+<div class="layuimini-main">
+
+    <div class="layui-form layuimini-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">楼栋号</label>
+            <div class="layui-input-block">
+                <input type="text" name="numbers" lay-verify="required" lay-reqtext="楼宇编号不能为空" placeholder="请输入楼栋，如16栋" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">所属单元</label>
+            <div class="layui-input-block">
+                <select name="uints" lay-verify="required">
+                    <option value="">请选择单元</option>
+                    <option value="1单元">1单元</option>
+                    <option value="2单元">2单元</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注信息</label>
+            <div class="layui-input-block">
+                <textarea name="remarks" class="layui-textarea" placeholder="请输入备注信息"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'table'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            table = layui.table,
+            $ = layui.$;
+
+        /**
+         * 初始化表单，要加上，不然刷新部分组件可能会不加载
+         */
+        form.render();
+
+        // 当前弹出层，防止ID被覆盖
+        var parentIndex = layer.index;
+
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            //获取表单中的数据信息
+            var datas=data.field;
+            addOrUpdateSubmit($,"building/add",datas);
+
+
+            return false;
+        });
+
+    });
+</script>

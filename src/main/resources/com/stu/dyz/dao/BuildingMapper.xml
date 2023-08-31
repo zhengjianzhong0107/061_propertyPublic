@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stu.dyz.dao.BuildingMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.stu.dyz.model.Building">
+                    <id column="id" property="id"/>
+                    <result column="numbers" property="numbers"/>
+                    <result column="uints" property="uints"/>
+                    <result column="remarks" property="remarks"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+            id, numbers, uints, remarks
+        </sql>
+
+    <!--查询楼宇-->
+    <select id="queryBuildAll" parameterType="string" resultType="com.stu.dyz.model.Building">
+        select * from building
+        <where>
+            <if test="numbers!=null and numbers!=''">
+                and numbers like '%${numbers}%'
+            </if>
+        </where>
+    </select>
+
+    <select id="queryBuildById" resultType="com.stu.dyz.model.Building" parameterType="Integer">
+        select * from building where id = #{buildId}
+    </select>
+</mapper>

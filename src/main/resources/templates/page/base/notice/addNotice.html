@@ -1,0 +1,84 @@
+<div class="layuimini-main">
+
+    <div class="layui-form layuimini-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">公告主题</label>
+            <div class="layui-input-block">
+                <input type="text" name="topic" lay-verify="required" lay-reqtext="公告主题不能为空" placeholder="请输入公告主题" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">公告内容</label>
+            <div class="layui-input-block">
+                <textarea name="content" class="layui-textarea" placeholder="请输入公告内容"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">发布时间</label>
+            <div class="layui-input-block">
+                <input type="text" id="date" name="fbdate" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注信息</label>
+            <div class="layui-input-block">
+                <textarea name="remarks" class="layui-textarea" placeholder="请输入备注信息"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    layui.use(['form', 'table','laydate'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            table = layui.table,
+            laydate=layui.laydate,
+            $ = layui.$;
+
+        // 日期
+        laydate.render({
+            elem: '#date',
+            trigger:'click'
+        });
+
+        // 当前弹出层，防止ID被覆盖
+        var parentIndex = layer.index;
+
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            //获取表单中的数据信息
+            var datas=data.field;
+            console.log(datas)
+            $.ajax({
+                url:"notice/add",
+                type:"POST",
+                data:datas,
+                success:function(result){
+                    if(result.code==0){//如果成功
+                        layer.msg('添加成功',{
+                            icon:6,
+                            time:500
+                        },function(){
+                            parent.window.location.reload();
+                            var iframeIndex = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(iframeIndex);
+                        })
+                    }else{
+                        layer.msg("添加失败");
+                    }
+                }
+            })
+            return false;
+        });
+
+    });
+</script>

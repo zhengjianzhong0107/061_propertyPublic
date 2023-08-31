@@ -1,0 +1,77 @@
+<div class="layuimini-main">
+
+    <div class="layui-form layuimini-form" lay-filter="updateSubmit">
+        <div class="layui-form-item">
+            <input type="hidden" name="id" id="userId"/>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">旧密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="oldPwd" lay-verify="required"   class="layui-input">
+            </div>
+        </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label required">新密码</label>
+                <div class="layui-input-block">
+                    <input type="password" name="newPwd" lay-verify="required"   class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label required">确认密码</label>
+                <div class="layui-input-block">
+                    <input type="password" name="newPwd2" lay-verify="required"   class="layui-input">
+                </div>
+            </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="updateSubmit">确认保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<script>
+    layui.use(['form', 'table'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            // table = layui.table,
+            $ = layui.$;
+        var userId=$("#userId").val();
+        //监听提交
+        form.on('submit(updateSubmit)', function (data) {
+            // console.log(data.field);
+            data=data.field;
+
+            if(data.newPwd2!=data.newPwd){
+                layer.msg("两次密码不一致，请重新输入")
+            }else{
+                //向后台发送数据并进行添加操作
+                $.ajax({
+                    url:"userinfo/update",
+                    type:"POST",
+                    // contentType:"application/json",
+                    data: {oldPwd:data.oldPwd,newPwd:data.newPwd,id:data.id},
+                    success:function(result){
+                        console.log(result)
+                        if(result.code==200){
+                            layer.msg("修改成功",{
+                                icon:6,
+                                time:500
+                            },function(){
+                                parent.window.location.reload();//重新页面
+                                var iframeIndex = parent.layer.getFrameIndex(window.name);
+                                parent.layer.close(iframeIndex);
+                            });
+
+                        }else{
+                            layer.msg("修改失败");
+                        }
+                    }
+                })
+            }
+
+            return false;
+        });
+    });
+</script>

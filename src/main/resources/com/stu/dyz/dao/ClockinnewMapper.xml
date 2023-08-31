@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stu.dyz.dao.ClockinnewMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.stu.dyz.model.Clockinnew">
+                    <id column="id" property="id"/>
+                    <result column="report_date" property="reportDate"/>
+                    <result column="owner_id" property="ownerId"/>
+                    <result column="type1" property="type1"/>
+                    <result column="type2" property="type2"/>
+                    <result column="today_address" property="todayAddress"/>
+                    <result column="remarks" property="remarks"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+            id, report_date, order_id, type1, type2, today_address, remarks
+        </sql>
+
+        <resultMap id="queryClockInAllMap" type="com.stu.dyz.model.Clockinnew" extends="BaseResultMap">
+            <association property="owner" javaType="com.stu.dyz.model.Owner">
+                <id column="id" property="id"></id>
+                <result column="username" property="username"></result>
+                <result column="tel" property="tel"></result>
+            </association>
+        </resultMap>
+
+        <select id="queryClockInAll" parameterType="com.stu.dyz.model.Clockinnew" resultMap="queryClockInAllMap">
+            SELECT cloc.*,owner.username,owner.tel
+            FROM clockinnew cloc
+            LEFT JOIN owner ON owner.id = cloc.owner_id
+            <where>
+                <if test="owner!=null">
+                    <if test="owner.username!=null and owner.username!=''">
+                        and owner.username = #{owner.username}
+                    </if>
+                </if>
+                <if test="ownerId!=null">
+                    and cloc.owner_id = #{ownerId}
+                </if>
+            </where>
+            order by report_date desc
+        </select>
+
+        <select id="queryCountByOwnId" resultType="java.util.Date" parameterType="Integer">
+            SELECT report_date
+            FROM clockinnew cloc
+            LEFT JOIN OWNER ON cloc.owner_id = owner.id
+            WHERE cloc.owner_id=#{ownerId}
+            ORDER BY report_date DESC
+            LIMIT 1
+        </select>
+</mapper>

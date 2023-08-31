@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stu.dao.ComplaintMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.stu.model.Complaint">
+                    <id column="id" property="id"/>
+                    <result column="com_id" property="comId"/>
+                    <result column="com_date" property="comDate"/>
+                    <result column="handle_date" property="handleDate"/>
+                    <result column="owner_id" property="ownerId"/>
+                    <result column="status" property="status"/>
+                    <result column="clr" property="clr"/>
+                    <result column="remarks" property="remarks"/>
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+            id, com_id, com_date, handle_date, owner_id, status, clr, remarks
+        </sql>
+
+   <resultMap id="queryComplaintAllMap" type="com.stu.model.Complaint" extends="BaseResultMap">
+       <association property="owner" javaType="com.stu.model.Owner">
+           <id property="id" column="id"></id>
+           <result property="username" column="username"></result>
+       </association>
+       <association property="type" javaType="com.stu.model.ComplaintType">
+           <id property="id" column="id"></id>
+           <result property="name" column="name"></result>
+       </association>
+   </resultMap>
+
+    <select id="queryComplaintAll" parameterType="com.stu.model.Complaint" resultMap="queryComplaintAllMap">
+         SELECT
+            com.*, own.username,
+            type.NAME
+        FROM
+            complaint com
+        LEFT JOIN complaint_type type ON type.id = com.com_id
+        LEFT JOIN `owner` own ON own.id = com.owner_id
+
+        <where>
+            <if test="comId!=null">
+                and com_id=#{comId}
+            </if>
+            <if test="status!=null ">
+                and com.status=#{status}
+            </if>
+            <if test="ownerId!=null ">
+                and com.owner_id=#{ownerId}
+            </if>
+        </where>
+
+    </select>
+
+</mapper>

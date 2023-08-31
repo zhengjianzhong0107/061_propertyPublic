@@ -1,0 +1,32 @@
+
+server:
+  port: 8888
+  servlet:
+    context-path: /
+
+spring:
+  resources:
+    static-locations: classpath:/static/,classpath:/templates/
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://localhost:3306/community?useUnicode=true&amp&characterEncoding=utf-8&serverTimezone=UTC
+    username: root
+    password: root
+  devtools:  # 热部署
+    livereload:
+      enabled: true
+  jackson: # 时间格式转化
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+# mybatis-plus
+mybatis-plus:
+  type-aliases-package: com.stu.model
+  mapper-locations: classpath:com/stu/dao/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+
